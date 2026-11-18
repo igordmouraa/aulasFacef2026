@@ -1,0 +1,21 @@
+aula 05
+
+## Gestão de projetos
+
+### O perfil de um gestor capaz → O caminho para a capacidade plena
+
+- Estágio N°01 → O novato
+
+- Estágio N°02 → O principiante avançado (A experiência começa a ser crucial. A medida que deparamos com situação da vida real, o desempenho melhora  mostramo-nos capazes de colar em prática os fatos e regras aprendidos)
+
+- Estágio N°03 → O competente (A medida que ganhamos competência, desenvolvemos uma melhor apreciação da complexidade da tarefa e reconhecemos um conjunto muito mais amplo de elementos a considerar. Desenvolvemos a capacidade de selecionar as mais relevantes e nelas nos concentramos)
+
+- Estágio N°04 → Proficiente (Aqui, o cálculo e a análise racional parecem desaparecer e começa a emergir a atuação inconsciente, fluida e sem esforço, em que nenhum plano é considerado exagero. Aprendemos a ‘ler’, inconscientemente, a situação em andamento)
+
+- Estágio N°05 →Perito (Neste nível, o desempenho converte-se numa segunda natureza. Os que alcançam esse estágio não têm mais consciência dos detalhes; pelo contrário, adotam uma perspectiva holistíca)
+
+# Metodologias Ágeis
+
+XP, RAD, …, SCRUM
+
+O objetivo do Kanban não é tornar a equipe ágil, e sim, melhorar a forma de trabalho. ele tanto pode melhorar processos ágeis como também pode melhorar processos tradicionais

@@ -1,0 +1,33 @@
+aula 02
+
+## Os 9 fatores que afetam a Gêrencia de Projetos:
+
+- Absorção de inovações tecnológicas;
+- Especificação do projeto;
+- Metodologias inadequadas;
+- Subestimativa de riscos;
+- Dificuldades de estimar recursos;
+- Dificuldades de aferir progresso;
+- Fraco acoplamento entre as estrátegias empresiariais;
+- Cultura das organizações;
+- Ambiente típico de desenvolvimento de projetos.
+
+> Dificuldade de estimar recursos = Não foi criado o plano de negócio
+> 
+
+## Os 10 atores da Gerência de Projetos:
+
+- Gerenciamento de Integração;
+- Gerenciamento de Escopo;
+- Gerenciamento de Qualidade;
+- Gerenciamento de Riscos;
+- Gerenciamento de Custos;
+- Gerenciamento de Tempo;
+- Gerenciamento das Comunicações;
+- Gerenciamento de Recursos Humanos;
+- Gerenciamento das Aquisições;
+- Gerenciamento de Partes Interessadas.
+
+### Cuidados - Dicas
+
+- Mentoria

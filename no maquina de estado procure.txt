@@ -1,0 +1,7 @@
+no maquina de estado procure sair sempre pelo caminho mais longo
+
+- drivers / Dev's - 
+- stubs   / QA - Criam códigos testes | Stubs vs. Mocks: Stubs fornecem respostas predefinidas, enquanto mocks são usados para verificar se interações específicas ocorreram.
+
+
+a decisão do caminho mais longo é a que fica por ultimo

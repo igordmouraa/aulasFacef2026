@@ -1,0 +1,63 @@
+aula 01
+
+## Gestão de Projetos
+
+- Em quais projetos você está inserido ?
+- Antes de gerenciar um projeto [ processos + pessoas ]
+
+### Gerencia a si mesmo
+
+- Autodisciplina
+- Organização Pessoal
+- Inteligência Emocional
+- Clareza
+
+> Quem não domina a própria rotina,  prioridades e emoções dificilmente conseguirá conduzir um projeto ao sucesso;
+> 
+
+> Quem não consegue medir, não consegue gerenciar;
+> 
+
+### A importância do G.P
+
+- É o elo que conecta a **estrátegia** da organização à execução prática;
+
+→ Exemplos:
+
+- Alinhamento estratégico = gerar valor real;
+- Otimização de recursos = tempo + R$ + pessoas;
+- Mitigação de riscos = identificar + reduzir;
+- Previsibilidade = monitorar prazos + custos + qualidade.
+
+### Objetivos principais
+
+1. Cumprir a tríplice Restrição → Escopo + tempo + custo;
+2. Engajar stakeholders =  Alinhar as expectativas dos clientes + patrocinadores ← Equipe;
+3. Garantir a qualidade =  Entregar os produtos ou serviços de acordo com os critérios definidos;
+4. Facilitar a comunicação = Eliminar ruídos e manter o fluxo.
+
+### Caracteristicas Necessárias
+
+1. **Autogestão e Liderança pessoal:**
+- Inteligência Emocional;
+- Disciplina e Organização;
+- Exemplo e Credibilidade.
+
+2. **Habilidades Comportamentais:**
+- Comunicação Assertiva;
+- Resolução de Conflitos;
+- Pensamento Crítico;
+- Apartabilidade.
+
+3. **Habilidades Técnicas:**
+- Dominio de Metodologias;
+- Gestão de Riscos;
+- Planejamento e Controle;
+- Ferramentas de Suporte.
+
+4. **Ciclo de Vida:**
+- Inicialização;
+- Planejamento;
+- Execução;
+- Monitoramento;
+- Finalização.

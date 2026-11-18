@@ -1,0 +1,425 @@
+# Estrutura de Dados II — Estrutura dos Códigos-Modelo (pasta `E.D.UniFacef.2026.2.ES`)
+### Baseado no código real do fork `igordmouraa/E.D.UniFacef.2026.2`
+
+> Este material explica **o que cada arquivo `.mjs` faz, parte por parte**: assinatura das funções, variáveis usadas, estrutura dos laços/recursão e o papel de cada trecho de código. Todos os trechos abaixo são o código real dos arquivos-modelo da disciplina.
+
+---
+
+## Estrutura de dados usada nos exemplos
+
+Dois "formatos" de dados aparecem nos arquivos: vetores simples (`nomes`, `numeros`) e vetores de objetos:
+
+```javascript
+// data/vetor-obj-nomes.mjs → objNomes
+{ first_name, group_name, classification, frequency_female, frequency_male, frequency_total, frequency_group, ratio, alternative_names }
+
+// data/motoristas-obj-desord.mjs → objMotoristas
+{ razao_social, cnpj, nome_motorista, cpf, vigencia_do_cadastro }
+```
+
+Isso importa porque metade dos arquivos-modelo (os `-obj.mjs`) não compara valores diretamente — eles recebem uma **função de comparação** (`fnComp`) como parâmetro, para funcionar com qualquer campo do objeto. Esse é o padrão estrutural que se repete em quase todos os arquivos.
+
+---
+
+## Bloco 1 — Busca
+
+### `01-busca-sequencial.mjs`
+```javascript
+function buscaSequencial(vetor, valorBusca) {
+  for (let i = 0; i < vetor.length; i++) {
+    if (vetor[i] === valorBusca) return i;
+  }
+  return -1 // valorBusca não existe em vetor
+}
+```
+**Estrutura:**
+- Recebe dois parâmetros: `vetor` (a coleção) e `valorBusca` (o alvo).
+- Um único `for` percorre o vetor do início ao fim (**condição de percurso**: `i < vetor.length`).
+- Dentro do laço, compara `vetor[i] === valorBusca`. Se bater, **retorna imediatamente** o índice `i` — isso interrompe o laço sem precisar de `break`, porque `return` já sai da função.
+- Se o laço terminar sem nenhum `return` interno, a linha final `return -1` é executada — é o sinal convencional de "não encontrado".
+- É genérica o bastante para funcionar com qualquer tipo comparável por `===` (strings, números), mas só compara **valores diretos**, não campos de objetos — por isso o próximo arquivo existe.
+
+### `02-busca-sequencial-obj.mjs`
+```javascript
+function buscaSequencial(vetor, fnComp){
+    for(let i = 0; i < vetor.length; i++){
+        if(fnComp(vetor[i])) return i
+    }
+}
+
+function comparaNome(obj){
+    return obj.first_name === "ALEXANDRE"
+}
+```
+**Estrutura:**
+- Mesma estrutura de laço do arquivo anterior, mas o segundo parâmetro **não é mais um valor**, é uma **função** (`fnComp`) — esse é o padrão de "função de comparação injetada", muito importante na disciplina.
+- Em vez de `vetor[i] === valorBusca`, a condição vira `fnComp(vetor[i])`: a própria função recebe o elemento inteiro (o objeto) e decide se ele "bate" ou não, retornando `true`/`false`.
+- `comparaNome` é um exemplo de `fnComp`: ela isola a regra de negócio (comparar o campo `first_name`) de dentro da função de busca — assim `buscaSequencial` continua **genérica**, e quem muda é a função passada como argumento.
+- Note que essa versão não tem `return -1` no final — se não encontrar, a função retorna `undefined` implicitamente.
+
+### `03-busca-binaria.mjs`
+```javascript
+function buscaBinaria(vetor, valorBusca){
+    let ini = 0
+    let fim = vetor.length - 1
+
+    while(fim >= ini){
+        let meio = Math.floor((ini+fim)/2)
+
+        if(valorBusca === vetor[meio]){
+            return meio
+        } else if (valorBusca > vetor[meio]){
+            ini = meio + 1
+        } else {
+            fim = meio - 1
+        }
+    }
+    return -1
+}
+```
+**Estrutura:**
+- Duas variáveis de controle, `ini` e `fim`, delimitam a **janela de busca atual** dentro do vetor (começam cobrindo o vetor inteiro).
+- O `while(fim >= ini)` é a **condição de percurso**: o laço continua enquanto ainda existir uma janela válida (pelo menos 1 elemento). Quando `fim` cruza `ini`, a janela "zerou" e não há mais o que buscar.
+- Dentro do laço, `meio` é recalculado a cada iteração como o ponto médio da janela atual.
+- O `if/else if/else` decide o que fazer com base na comparação:
+  - Igual → `return meio` (achou, sai da função).
+  - `valorBusca` maior que o do meio → o alvo só pode estar à direita, então `ini = meio + 1` (descarta a metade esquerda, incluindo o meio).
+  - Caso contrário → o alvo só pode estar à esquerda, então `fim = meio - 1` (descarta a metade direita).
+- **Por que precisa estar ordenado:** essa lógica de "descartar metade" só é válida porque o vetor está ordenado — é a suposição estrutural que sustenta todo o algoritmo.
+- `return -1` fora do laço: mesma convenção de "não encontrado".
+
+### `04-busca-binaria-obj.mjs`
+```javascript
+function buscaBinaria(vetor, fnComp){
+    let ini = 0
+    let fim = vetor.length - 1
+    
+    while(fim >= ini){
+        let meio = Math.floor((ini+fim)/2)
+
+        switch(fnComp(vetor[meio])){
+            case 0: return meio
+            case 1: ini = meio + 1; break
+            default: fim = meio - 1
+        }
+    }
+    return -1
+}
+
+function comparar(valorMeio, valorBusca = "ALEXANDRE"){
+    if(valorBusca === valorMeio.first_name) return 0
+    else if(valorBusca > valorMeio.first_name) return 1
+    else return -1
+}
+```
+**Estrutura:**
+- Mesmo esqueleto de `ini`/`fim`/`meio` da busca binária simples, mas a decisão de ir pra esquerda/direita/achar não é mais um `if` direto — é um `switch` sobre o **retorno numérico** de `fnComp`.
+- Convenção adotada: `fnComp` retorna `0` (achou), `1` (vá para a direita) ou qualquer outro valor, tratado no `default` (vá para a esquerda). Isso é o equivalente, em forma de função externa, ao `if/else if/else` do arquivo `03`.
+- `comparar` é a implementação da `fnComp`: recebe o objeto do meio e compara o campo `first_name` com um valor fixo (`"ALEXANDRE"`, valor default do segundo parâmetro).
+- Esse padrão (comparador retornando `-1`/`0`/`1`) é o mesmo usado por funções nativas como `Array.prototype.sort()`.
+
+---
+
+## Bloco 2 — Recursividade
+
+### `09-recursividade.mjs`
+```javascript
+function fatorial(n){
+    let result = 1
+    for(let i = n; i > 1; i--){
+        result *= i
+    }
+    return result
+}
+
+function fatorialRec(n){
+    if(n <= 1){
+        return 1
+    }
+    return n * fatorialRec(n - 1)
+}
+```
+**Estrutura — versão iterativa (`fatorial`):**
+- Usa uma variável acumuladora `result`, inicializada em `1`.
+- O `for` conta **de trás para frente**, de `n` até `2` (`i > 1`), multiplicando `result` a cada passo. Não há chamada de função dentro do laço — é um cálculo direto.
+
+**Estrutura — versão recursiva (`fatorialRec`):**
+- `if(n <= 1) return 1` é a **condição de saída**: o caso mais simples, que não precisa de mais chamadas.
+- `return n * fatorialRec(n - 1)` é o **caso recursivo**: a função se chama a si mesma com um valor **menor** (`n - 1`), aproximando-se do caso base a cada chamada. O resultado só é calculado quando a recursão "volta" (a multiplicação por `n` só acontece depois que `fatorialRec(n-1)` retornar um valor).
+- Cada chamada pendente fica empilhada na *call stack* até `n` chegar a `1`; depois disso, as multiplicações são resolvidas "de trás para frente".
+
+---
+
+## Bloco 3 — Ordenação simples
+
+### `05-bubble-sort.mjs`
+```javascript
+function bubbleSort(vetor) {
+  let trocou;
+  do {
+    trocou = false;
+    for (let i = 0; i < vetor.length - 1; i++) {
+      if (vetor[i] > vetor[i + 1]) {
+        [vetor[i], vetor[i + 1]] = [vetor[i + 1], vetor[i]];
+        trocou = true;
+      }
+    }
+  } while (trocou);
+}
+```
+**Estrutura:**
+- `trocou` é uma **flag de controle**: começa `false` a cada passagem e vira `true` se **qualquer** troca acontecer.
+- O laço externo é um `do...while(trocou)`: roda pelo menos uma vez, e **continua repetindo enquanto houve troca na última passagem**. Essa é a otimização de "parada antecipada" — se uma passagem inteira não trocar nada, o vetor já está ordenado e o laço para.
+- O laço interno (`for`) percorre pares adjacentes (`vetor[i]` e `vetor[i+1]`), comparando-os.
+- A linha `[vetor[i], vetor[i+1]] = [vetor[i+1], vetor[i]]` é uma **troca via desestruturação de array** (sintaxe moderna do JS para swap sem variável temporária).
+- Importante: a função **não retorna nada** — ela ordena o vetor **in-place** (modifica o array original recebido por referência).
+
+### `06-bubble-sort-obj.mjs`
+```javascript
+let pass, comps, trocas
+
+function bubbleSort(vetor, fnComp) {
+  pass=0, comps=0, trocas=0
+  let trocou;
+  do {
+    pass++
+    trocou = false;
+    for (let i = 0; i < vetor.length - 1; i++) {
+        comps++
+      if (fnComp(vetor[i], vetor[i + 1])) {
+        [vetor[i], vetor[i + 1]] = [vetor[i + 1], vetor[i]];
+        trocou = true;
+        trocas++
+      }
+    }
+  } while (trocou);
+}
+```
+**Estrutura (diferenças em relação ao `05`):**
+- Três variáveis (`pass`, `comps`, `trocas`) são declaradas **fora** da função (no escopo do módulo), para poderem ser lidas depois que a função terminar de rodar.
+- Dentro da função, elas são **zeradas** no início de cada execução (`pass=0, comps=0, trocas=0` — note a vírgula, são três atribuições numa linha só).
+- `pass++` conta quantas vezes o laço `do...while` rodou (quantas passagens completas).
+- `comps++` conta **cada comparação individual** feita no `if`, dentro do laço interno.
+- `trocas++` conta apenas quando uma troca de fato acontece.
+- A comparação `vetor[i] > vetor[i+1]` do arquivo `05` virou `fnComp(vetor[i], vetor[i+1])` — mesmo padrão de "função injetada" já visto na busca. No uso real (`bubbleSort(objMotoristas, (elem1, elem2) => elem1.nome_motorista > elem2.nome_motorista)`), a função de comparação é passada como **arrow function inline**, comparando um campo específico do objeto.
+- Ao final, `console.log({pass, comps, trocas})` expõe as três métricas usando a sintaxe de **shorthand de objeto** (equivalente a `{pass: pass, comps: comps, trocas: trocas}`).
+
+### `07-selection-sort.mjs`
+```javascript
+function selectionSort(vetor) {
+  for (let posSel = 0; posSel < vetor.length - 1; posSel++) {
+    let posMenor = posSel + 1;
+    for (let i = posMenor + 1; i < vetor.length; i++) {
+      if (vetor[posMenor] > vetor[i]) posMenor = i;
+    }
+    if (vetor[posSel] > vetor[posMenor]) {
+      [vetor[posSel], vetor[posMenor]] = [vetor[posMenor], vetor[posSel]];
+    }
+  }
+}
+```
+**Estrutura:**
+- Laço externo (`posSel`): representa a posição que está **sendo preenchida** nesta passagem, avançando da esquerda pra direita.
+- `posMenor` é inicializada como `posSel + 1` — o candidato a "menor elemento restante" começa logo depois da posição atual.
+- Laço interno (`i`): varre o restante do vetor **procurando** um elemento menor que o atual candidato `posMenor`. Sempre que encontra, atualiza `posMenor = i` — mas **não troca nada ainda**, só guarda a posição.
+- Só depois que o laço interno termina (ou seja, já se sabe com certeza qual é o menor elemento restante), o `if` final decide se vale a pena trocar `posSel` com `posMenor`.
+- **Diferença estrutural chave em relação ao bubble sort:** aqui existe no máximo **uma troca por passagem** (fora do laço interno), enquanto no bubble sort podem ocorrer várias trocas dentro da mesma passagem.
+
+### `08-selection-sort-obj.mjs`
+```javascript
+let pass, comps, trocas;
+
+function selectionSort(vetor, fnComp) {
+  ((pass = 0), (comps = 0), (trocas = 0));
+  for (let posSel = 0; posSel < vetor.length - 1; posSel++) {
+    pass++;
+    let posMenor = posSel + 1;
+    for (let i = posMenor + 1; i < vetor.length; i++) {
+      if (fnComp(vetor[posMenor], vetor[i])) posMenor = i;
+      comps++;
+    }
+    comps++;
+    if (fnComp(vetor[posSel], vetor[posMenor])) {
+      [vetor[posSel], vetor[posMenor]] = [vetor[posMenor], vetor[posSel]];
+      trocas++;
+    }
+  }
+}
+```
+**Estrutura (diferenças em relação ao `07`):**
+- Mesma lógica de instrumentação do `06-bubble-sort-obj.mjs`: variáveis `pass`/`comps`/`trocas` fora da função, zeradas no início.
+- `pass++` conta uma vez por passagem do laço externo (uma por posição preenchida).
+- `comps++` aparece **duas vezes**: uma dentro do laço interno (a cada comparação pra achar o menor) e uma logo depois dele (a comparação final que decide se troca `posSel` com `posMenor`). Isso reflete fielmente que **toda** comparação do algoritmo é contada, mesmo a que decide a troca final.
+- `fnComp(vetor[posMenor], vetor[i])` no lugar de `vetor[posMenor] > vetor[i]`: mesmo padrão de injeção de comparador, usado aqui para ordenar `objMotoristas` por `nome_motorista`.
+
+---
+
+## Bloco 4 — Ordenação por divisão e conquista
+
+### `10-merge-sort.mjs`
+```javascript
+function mergeSort(vetor) {
+  //condição de saída
+  if (vetor.length < 2) return vetor;
+
+  let meio = Math.floor(vetor.length / 2);
+  let vetEsq = vetor.slice(0, meio);
+  let vetDir = vetor.slice(meio);
+
+  //chamadas recursivas
+  vetEsq = mergeSort(vetEsq);
+  vetDir = mergeSort(vetDir);
+
+  //mesclagem ordenada de vetEsq com vetDir
+  let posEsq = 0, posDir = 0, vetRes = [];
+
+  while (posEsq < vetEsq.length && posDir < vetDir.length) {
+    if (vetEsq[posEsq] < vetDir[posDir]) {
+      vetRes.push(vetEsq[posEsq]);
+      posEsq++;
+    } else {
+      vetRes.push(vetDir[posDir]);
+      posDir++;
+    }
+  }
+
+  let sobra;
+  if (posEsq < posDir) {
+    sobra = vetEsq.slice(posEsq);
+  } else {
+    sobra = vetDir.slice(posDir);
+  }
+
+  return [...vetRes, ...sobra];
+}
+```
+**Estrutura, em três etapas claras (os próprios comentários do código marcam isso):**
+
+1. **Condição de saída:** `if (vetor.length < 2) return vetor`. Um array de 0 ou 1 elemento já está, por definição, ordenado — não há o que dividir.
+2. **Divisão + chamadas recursivas:** `vetor.slice(0, meio)` e `vetor.slice(meio)` cortam o array em duas metades (sem alterar o original, `slice` retorna uma cópia). Cada metade é então passada recursivamente para o próprio `mergeSort`, e o resultado (já ordenado) é reatribuído a `vetEsq`/`vetDir`.
+3. **Mesclagem (merge):** com as duas metades já ordenadas, um `while` duplo com dois ponteiros (`posEsq`, `posDir`) percorre ambas simultaneamente, sempre empurrando pra `vetRes` o **menor dos dois valores atuais** e avançando o ponteiro correspondente.
+   - O `while` para assim que **um dos dois lados esgotar**. O bloco de "sobra" (`if/else` com `slice`) resolve isso pegando o que restou do lado que ainda tinha elementos — nota-se aqui um detalhe: a condição usa `posEsq < posDir`, comparando os **ponteiros**, e não `vetEsq.length`/`vetDir.length` diretamente, mas o efeito prático é anexar o que sobrou.
+- `return [...vetRes, ...sobra]`: usa o **spread operator** para concatenar os dois arrays num só, que é o array final ordenado retornado.
+- Assim como as funções de busca recursiva, essa função **retorna um novo array** (não ordena in-place como o bubble/selection sort).
+
+### `11-merge-sort-obj.mjs`
+```javascript
+let comps = 0, divisoes = 0, juncoes = 0;
+
+function mergeSort(vetor, fnComp) {
+  if (vetor.length < 2) return vetor;
+  let meio = Math.floor(vetor.length / 2);
+  divisoes++;
+  let vetEsq = vetor.slice(0, meio);
+  let vetDir = vetor.slice(meio);
+  vetEsq = mergeSort(vetEsq, fnComp);
+  vetDir = mergeSort(vetDir, fnComp);
+  let posEsq = 0, posDir = 0, vetRes = [];
+  while (posEsq < vetEsq.length && posDir < vetDir.length) {
+    comps++;
+    if (fnComp(vetDir[posDir], vetEsq[posEsq])) {
+      vetRes.push(vetEsq[posEsq]);
+      posEsq++;
+    } else {
+      vetRes.push(vetDir[posDir]);
+      posDir++;
+    }
+  }
+  // ... sobra igual ao arquivo 10
+  juncoes++;
+  return [...vetRes, ...sobra];
+}
+```
+**Estrutura (diferenças em relação ao `10`):**
+- `divisoes++` é incrementado **uma vez por chamada** da função (logo depois de calcular `meio`) — conta quantas vezes o array foi dividido ao meio.
+- `juncoes++` é incrementado **uma vez por chamada**, mas no final, logo antes do `return` — conta quantas vezes um merge foi finalizado.
+- `comps++` conta as comparações feitas dentro do `while` de mesclagem.
+- A comparação vira `fnComp(vetDir[posDir], vetEsq[posEsq])` (função injetada), permitindo ordenar `objMotoristas` — no uso real, por `nome_motorista` como critério único. Para o exercício de dois níveis (primeiro `razao_social`, depois `nome_motorista` em caso de empate), a `fnComp` passada precisaria checar o primeiro campo e, se empatado, o segundo — a estrutura da função `mergeSort` em si **não muda**, só a lógica interna da `fnComp`.
+
+### `12-quick-sort.mjs`
+```javascript
+let pass = 0, comps = 0, trocas = 0
+
+function quickSort(vetor, ini = 0, fim = vetor.length - 1) {
+  if (fim <= ini) return;
+
+  pass++
+  const pivot = fim;
+  let div = ini - 1;
+
+  for (let i = ini; i < fim; i++) {
+    comps++
+    if (vetor[pivot] > vetor[i]) {
+      div++;
+      if (div !== i) {
+        [vetor[i], vetor[div]] = [vetor[div], vetor[i]];
+        trocas++
+      }
+    }
+  }
+  div++;
+
+  comps++
+  if (vetor[div] > vetor[pivot] && div !== pivot) {
+    [vetor[div], vetor[pivot]] = [vetor[pivot], vetor[div]];
+    trocas++
+  }
+
+  quickSort(vetor, ini, div - 1);
+  quickSort(vetor, div + 1, fim);
+}
+```
+**Estrutura — parâmetros:**
+- `ini` e `fim` têm **valores default** (`0` e `vetor.length - 1`), então a primeira chamada externa (`quickSort(nums)`) não precisa informá-los — eles só são passados explicitamente nas chamadas **recursivas internas**, quando o algoritmo precisa restringir a região do array sendo tratada.
+
+**Estrutura — condição de saída:**
+- `if (fim <= ini) return`: uma região com 0 ou 1 elemento não precisa ser particionada. Sem valor de retorno explícito — a função ordena **in-place**.
+
+**Estrutura — particionamento (o núcleo do algoritmo):**
+- `const pivot = fim`: o pivô escolhido é sempre o **índice do último elemento** da região atual.
+- `div` é um ponteiro que marca a fronteira entre "elementos já confirmados como menores que o pivô" e "elementos ainda não avaliados". Começa em `ini - 1` (fronteira vazia).
+- O `for` percorre `i` de `ini` até `fim - 1` (não inclui o pivô), comparando cada elemento com o valor do pivô (`vetor[pivot] > vetor[i]`):
+  - Se o elemento atual for **menor** que o pivô, `div` avança (`div++`) e o elemento é trocado para dentro da região "menores" (só troca de fato se `div !== i`, evitando troca desnecessária de um elemento com ele mesmo).
+- Depois do laço, `div++` avança mais uma vez, marcando a posição **onde o pivô deve ficar**.
+- O `if` seguinte troca o pivô (que ainda está em `fim`) para a posição `div` — **essa é a posição final e definitiva do pivô** no array ordenado.
+- **Recursão:** `quickSort(vetor, ini, div - 1)` ordena tudo à esquerda do pivô, e `quickSort(vetor, div + 1, fim)` ordena tudo à direita — cada chamada recebe uma região **estritamente menor** que a anterior, o que garante que a recursão eventualmente atinge a condição de saída.
+- `pass`, `comps` e `trocas` seguem a mesma lógica de instrumentação dos arquivos anteriores, mas aqui `pass++` conta **uma vez por chamada de partição** (não por passagem de laço como no bubble sort).
+
+**Para a variação pedida no exercício (pivô no início, posição `ini`):** a mudança estrutural principal seria trocar `const pivot = fim` por `const pivot = ini`, e reorganizar a lógica do laço/particionamento de forma simétrica (o `for` percorreria a partir de `ini + 1`, e o pivô seria movido para o final da região "menores" em vez de para o início da região "maiores"). A lógica de recursão nas duas chamadas finais continua a mesma.
+
+### `13-quick-sort-obj.mjs`
+```javascript
+function quickSort(vetor, fnComp, ini = 0, fim = vetor.length - 1) {
+  if (fim <= ini) return;
+  pass++;
+  const pivot = fim;
+  let div = ini - 1;
+  for (let i = ini; i < fim; i++) {
+    comps++;
+    if (fnComp(vetor[pivot], vetor[i])) { /* ... mesma lógica ... */ }
+  }
+  div++;
+  comps++;
+  if (fnComp(vetor[div], vetor[pivot]) && div !== pivot) { /* ... */ }
+  quickSort(vetor, fnComp, ini, div - 1);
+  quickSort(vetor, fnComp, div + 1, fim);
+}
+```
+**Estrutura (diferença em relação ao `12`):** é exatamente a mesma estrutura de particionamento e recursão, com um parâmetro extra `fnComp` logo após `vetor` — que precisa ser **repassado manualmente em toda chamada recursiva** (`quickSort(vetor, fnComp, ini, div - 1)`), já que agora a comparação `vetor[pivot] > vetor[i]` virou `fnComp(vetor[pivot], vetor[i])`.
+
+---
+
+## Padrões estruturais que se repetem em (quase) todos os arquivos
+
+| Padrão | Onde aparece | Para quê serve |
+|---|---|---|
+| Função de comparação injetada (`fnComp`) | Todos os arquivos `-obj.mjs` | Deixa a função de busca/ordenação genérica, funcionando com qualquer campo do objeto sem reescrever o algoritmo |
+| Variáveis de instrumentação fora da função (`pass`, `comps`, `trocas`, `divisoes`, `juncoes`) | `06`, `08`, `11`, `12`, `13` | Permitem inspecionar, depois da execução, quantas operações o algoritmo realmente fez |
+| Condição de saída + caso recursivo | `09` (fatorial), `10`/`11` (merge sort), `12`/`13` (quick sort) | Toda função recursiva precisa das duas partes para não entrar em loop infinito |
+| Troca via desestruturação `[a, b] = [b, a]` | `05`, `06`, `07`, `08`, `12`, `13` | Sintaxe moderna do JS para trocar dois valores de posição sem variável auxiliar |
+| Ordenação **in-place** vs. **retorno de novo array** | In-place: bubble e selection sort · Novo array: merge sort | Ordenar in-place economiza memória; merge sort precisa de arrays auxiliares por natureza do algoritmo |
+| `import { ... } from "./data/..."` | Praticamente todos | Os dados de teste ficam isolados na pasta `data/`, mantendo os arquivos de algoritmo focados só na lógica |
+
+---
+
+*Material gerado a partir do código real do fork `igordmouraa/E.D.UniFacef.2026.2`, pasta `E.D.UniFacef.2026.2.ES`.*
